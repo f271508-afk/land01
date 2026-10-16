@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>土地開發業務專家 system - Land Dev Pro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for graphics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts Inter / Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            gold: '#d97706',
+                            emerald: '#059669',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased h-screen flex flex-col overflow-hidden">
+
+    <!-- Header Navigation -->
+    <header class="bg-brand-900 text-white shadow-md flex-none z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-500 p-2 rounded-lg text-white font-bold text-xl flex items-center justify-center w-10 h-10 shadow">
+                    <i class="fa-solid font-bold fa-mountain-city"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide">土開大師 <span class="text-xs bg-amber-500/30 text-amber-300 px-2 py-0.5 rounded ml-1 border border-amber-400/30">PRO</span></h1>
+                    <p class="text-xs text-slate-400">土地開發業務開發評估與地主CRM管理系統</p>
+                </div>
+            </div>
+
+            <!-- Global Action Buttons -->
+            <div class="flex items-center space-x-3">
+                <button onclick="openModal('addProjectModal')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm px-3.5 py-2 rounded-lg font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden md:inline">新增開發案</span>
+                </button>
+                <div class="h-6 w-px bg-slate-700"></div>
+                <div class="flex items-center space-x-2 text-xs text-slate-300">
+                    <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-amber-400 font-bold border border-slate-600">
+                        開發
+                    </div>
+                    <span class="hidden sm:inline font-medium">張副理 (資深開發)</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Sidebar Navigation (Moved to Left Side) -->
+        <aside class="w-16 md:w-60 bg-white border-r border-slate-200 flex-none flex flex-col justify-between z-10 transition-all duration-300 order-1">
+            <nav class="p-2 md:p-4 space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium text-brand-600 bg-brand-50 transition">
+                    <i class="fa-solid fa-chart-pie text-lg w-6 text-center"></i>
+                    <span class="hidden md:inline text-sm">主控台 dashboard</span>
+                </button>
+                <button onclick="switchTab('projects')" id="nav-projects" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-map-location-dot text-lg w-6 text-center"></i>
+                    <span class="hidden md:inline text-sm">開發案場庫</span>
+                </button>
+                <button onclick="switchTab('calculator')" id="nav-calculator" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-calculator text-lg w-6 text-center"></i>
+                    <span class="hidden md:inline text-sm">試算容積與開發坪</span>
+                </button>
+                <button onclick="switchTab('roi')" id="nav-roi" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-coins text-lg w-6 text-center text-emerald-600"></i>
+                    <span class="hidden md:inline text-sm">財務與投報分析</span>
+                </button>
+                <button onclick="switchTab('crm')" id="nav-crm" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-users-gear text-lg w-6 text-center"></i>
+                    <span class="hidden md:inline text-sm">地主關係 CRM</span>
+                </button>
+                <button onclick="switchTab('regulations')" id="nav-regulations" class="nav-btn w-full flex items-center gap-3 px-3 py-3 rounded-xl font-medium text-slate-600 hover:bg-slate-100 transition">
+                    <i class="fa-solid fa-book-bookmark text-lg w-6 text-center"></i>
+                    <span class="hidden md:inline text-sm">土地分區與法規</span>
+                </button>
+            </nav>
+
+            <div class="p-3 border-t border-slate-100 hidden md:block text-xs text-slate-400">
+                <div class="flex items-center gap-2 mb-1">
+                    <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+                    <span>離線快取/本地資料已備份</span>
+                </div>
+                <p class="text-[10px] text-slate-400">v2.5.0 • LandDev System</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 bg-slate-50 order-2">
+
+            <!-- TAB 1: Dashboard -->
+            <section id="tab-dashboard" class="tab-content space-y-6">
+                <!-- Top Summary Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+                        <div class="flex items-center justify-between text-slate-500 text-xs mb-1">
+                            <span>追蹤中總案量</span>
+                            <i class="fa-solid fa-folder-open text-brand-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-slate-800" id="total-projects-count">8 件</div>
+                        <div class="text-xs text-slate-500 mt-1">預估總面積: <span class="font-semibold text-slate-700" id="total-land-area">3,450 坪</span></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+                        <div class="flex items-center justify-between text-slate-500 text-xs mb-1">
+                            <span>洽談中高意願案</span>
+                            <i class="fa-solid fa-handshake text-amber-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-amber-600" id="hot-projects-count">3 件</div>
+                        <div class="text-xs text-amber-600/80 mt-1">成案率估算 > 70%</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+                        <div class="flex items-center justify-between text-slate-500 text-xs mb-1">
+                            <span>本季預估簽約面積</span>
+                            <i class="fa-solid fa-file-contract text-emerald-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-emerald-600">1,280 坪</div>
+                        <div class="text-xs text-emerald-600/80 mt-1">含合建/買斷案場</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow transition">
+                        <div class="flex items-center justify-between text-slate-500 text-xs mb-1">
+                            <span>待聯繫地主戶數</span>
+                            <i class="fa-solid fa-user-clock text-rose-500"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-rose-600">14 人</div>
+                        <div class="text-xs text-rose-600/80 mt-1">近7日未拜訪/電話關注</div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Charts and Active Leads -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Funnel Analysis Chart -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2 mb-4">
+                                <i class="fa-solid fa-filter text-brand-500"></i> 開發進度狀況分布
+                            </h3>
+                            <div class="h-60 relative">
+                                <canvas id="pipelineChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="text-xs text-slate-500 text-center mt-3 pt-3 border-t border-slate-100">
+                            評估中 → 洽談中 → 簽約中 → 完成開發
+                        </div>
+                    </div>
+
+                    <!-- Priority Follow-ups Table/List -->
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-fire text-amber-500"></i> 近期高優先追蹤案場 (Focus)
+                            </h3>
+                            <button onclick="switchTab('projects')" class="text-xs text-brand-600 font-medium hover:underline">查看全部 →</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-600">
+                                <thead class="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase font-semibold">
+                                    <tr>
+                                        <th class="p-3">案場名稱 / 區域</th>
+                                        <th class="p-3">使用分區</th>
+                                        <th class="p-3">土地面積</th>
+                                        <th class="p-3">開發模式</th>
+                                        <th class="p-3">地主意願度</th>
+                                        <th class="p-3">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-recent-projects" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Insertion -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Action Banners -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gradient-to-r from-brand-800 to-brand-700 text-white rounded-xl p-5 shadow flex items-center justify-between">
+                        <div>
+                            <div class="text-xs text-brand-200 font-medium mb-1">精準容積計算工具</div>
+                            <h4 class="text-lg font-bold">快速試算基地開發總坪數？</h4>
+                            <p class="text-xs text-brand-100 mt-1">包含獎勵容積、建蔽率與免計容積比例設定</p>
+                        </div>
+                        <button onclick="switchTab('calculator')" class="bg-white text-brand-800 text-xs px-4 py-2.5 rounded-lg font-bold shadow hover:bg-brand-50 transition">
+                            立即試算 <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-slate-800 to-slate-700 text-white rounded-xl p-5 shadow flex items-center justify-between">
+                        <div>
+                            <div class="text-xs text-amber-300 font-medium mb-1">地主拜訪紀錄與經營</div>
+                            <h4 class="text-lg font-bold">記錄地主家族關係與對話</h4>
+                            <p class="text-xs text-slate-300 mt-1">關鍵持份地主意願追蹤，掌握談判籌碼</p>
+                        </div>
+                        <button onclick="switchTab('crm')" class="bg-amber-50 text-slate-900 text-xs px-4 py-2.5 rounded-lg font-bold shadow hover:bg-amber-400 transition">
+                            進入CRM <i class="fa-solid fa-users ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: Projects Database -->
+            <section id="tab-projects" class="tab-content hidden space-y-6">
+                <!-- Search & Filters -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap gap-3 items-center justify-between">
+                    <div class="flex items-center gap-3 flex-1 min-w-[280px]">
+                        <div class="relative w-full max-w-md">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="project-search" oninput="renderProjects()" placeholder="搜尋案名、地號、地主姓名或行政區..." class="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                        </div>
+                        <select id="filter-status" onchange="renderProjects()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-brand-500">
+                            <option value="ALL">全部開發狀態</option>
+                            <option value="評估中">評估中</option>
+                            <option value="洽談中">洽談中</option>
+                            <option value="簽約中">簽約中</option>
+                            <option value="已成案">已成案</option>
+                        </select>
+                        <select id="filter-zone" onchange="renderProjects()" class="text-xs border border-slate-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-brand-500">
+                            <option value="ALL">全部都市分區</option>
+                            <option value="住三">住三</option>
+                            <option value="住四">住四</option>
+                            <option value="商二">商二</option>
+                            <option value="商三">商三</option>
+                        </select>
+                    </div>
+                    <button onclick="openModal('addProjectModal')" class="bg-brand-600 text-white text-xs px-4 py-2 rounded-lg font-medium hover:bg-brand-500 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> 新增開發案場
+                    </button>
+                </div>
+
+                <!-- Projects List Cards Grid -->
+                <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Dynamic rendering via JS -->
+                </div>
+            </section>
+
+            <!-- TAB 3: Land Capacity Calculator -->
+            <section id="tab-calculator" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="border-b border-slate-200 pb-4 mb-6">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-brand-600"></i> 土地開發容積與總坪數快速試算器
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">依據土地面積、都市計畫法定容積率、獎勵容積與公設比，數值調整即時自動重算。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <!-- Input Column -->
+                        <div class="lg:col-span-5 space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <h3 class="font-bold text-sm text-slate-700 border-b border-slate-200 pb-2">1. 土地與規劃基本參數</h3>
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">基地土地面積</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="relative">
+                                        <input type="number" id="calc-area-ping" value="150" oninput="syncAreaInputs('ping')" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg pr-8 focus:ring-2 focus:ring-brand-500">
+                                        <span class="absolute right-2.5 top-2 text-xs text-slate-400 font-medium">坪</span>
+                                    </div>
+                                    <div class="relative">
+                                        <input type="number" id="calc-area-m2" value="495.87" oninput="syncAreaInputs('m2')" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg pr-12 focus:ring-2 focus:ring-brand-500">
+                                        <span class="absolute right-2.5 top-2 text-xs text-slate-400 font-medium">平方公尺</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">法定建蔽率 (%)</label>
+                                    <input type="number" id="calc-cov-rate" value="45" oninput="calculateLandCapacity()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">法定容積率 (%)</label>
+                                    <input type="number" id="calc-vol-rate" value="225" oninput="calculateLandCapacity()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                                </div>
+                            </div>
+
+                            <h3 class="font-bold text-sm text-slate-700 border-b border-slate-200 pb-2 pt-2">2. 容積獎勵與免計容積估算</h3>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">危老/都更/獎勵容積 (%)</label>
+                                    <input type="number" id="calc-bonus-rate" value="20" oninput="calculateLandCapacity()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">容積移轉 (%)</label>
+                                    <input type="number" id="calc-transfer-rate" value="0" oninput="calculateLandCapacity()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">陽台/梯廳免計容積倍率</label>
+                                    <input type="number" step="0.01" id="calc-exempt-ratio" value="1.15" oninput="calculateLandCapacity()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                                    <span class="text-[10px] text-slate-400">常規約1.15 ~ 1.20</span>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">預估公設比 (%)</label>
+                                    <input type="number" id="calc-public-ratio" value="34" oninput="calculateLandCapacity()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Output Calculation Results -->
+                        <div class="lg:col-span-7 flex flex-col justify-between space-y-6">
+                            <div class="bg-brand-900 text-white p-6 rounded-xl shadow-md">
+                                <div class="text-xs text-brand-300 font-medium mb-1">總預估可建售坪 (約略估算)</div>
+                                <div class="text-3xl md:text-4xl font-extrabold text-amber-400 mb-4" id="res-total-build-ping">621.00 坪</div>
+                                
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 border-t border-brand-800 pt-4 text-xs">
+                                    <div>
+                                        <span class="text-brand-300 block">法定容積坪</span>
+                                        <span class="text-base font-bold text-white" id="res-base-vol-ping">337.5 坪</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-brand-300 block">獎勵後總容積坪</span>
+                                        <span class="text-base font-bold text-amber-300" id="res-total-vol-ping">405.0 坪</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-brand-300 block">建築總樓地板面積</span>
+                                        <span class="text-base font-bold text-white" id="res-gross-floor-ping">465.75 坪</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Analysis Cards -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                                    <div class="text-xs font-semibold text-slate-500 mb-2">單層建築面積</div>
+                                    <div class="text-xl font-bold text-slate-800" id="res-building-footprint">67.5 坪</div>
+                                    <p class="text-[11px] text-slate-500 mt-1">基地面積 × 建蔽率 45%</p>
+                                </div>
+
+                                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                                    <div class="text-xs font-semibold text-slate-500 mb-2">預估開發效益比 (坪數乘數)</div>
+                                    <div class="text-xl font-bold text-emerald-600" id="res-multiplier">1 : 4.14 坪</div>
+                                    <p class="text-[11px] text-slate-500 mt-1">每一地坪可蓋出之售坪倍數</p>
+                                </div>
+                            </div>
+
+                            <!-- Developer Note Box -->
+                            <div class="p-4 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-800">
+                                <div class="font-bold mb-1 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> 土開業務注意事項
+                                </div>
+                                <ul class="list-disc list-inside space-y-1 text-amber-700/90 text-[11px]">
+                                    <li>本試算結果未含地下室車位開挖面積與獎勵、獎勵機房免計之詳細建築師檢討。</li>
+                                    <li>實際可建坪數仍須依各直轄市/縣市都市計畫土地使用管制要點與建築師會辦評估為準。</li>
+                                </ul>
+                            </div>
+
+                            <div class="pt-2">
+                                <button onclick="transferToROI()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-coins text-sm"></i> 立即帶入財務及投報分析 <i class="fa-solid fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: Financial & ROI Analysis -->
+            <section id="tab-roi" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="border-b border-slate-200 pb-4 mb-6">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-coins text-emerald-600"></i> 開發案財務與投資報酬率 (ROI) 分析器
+                        </h2>
+                        <p class="text-xs text-slate-500 mt-1">綜合評估土地買斷/合建成本、中人費、營建與融資利息，數值異動即時自動更新。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Left Column: Input Parameters -->
+                        <div class="lg:col-span-5 space-y-4 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <h3 class="font-bold text-sm text-slate-700 border-b border-slate-200 pb-2">1. 基地規模與銷售設定</h3>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">基地面積 (坪)</label>
+                                    <input type="number" id="roi-area-ping" value="200" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">預估總建坪 (售坪)</label>
+                                    <input type="number" id="roi-total-sale-ping" value="820" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">預估推案均價 (萬/坪)</label>
+                                    <input type="number" id="roi-sale-price" value="85" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">車位總數 (個)</label>
+                                    <input type="number" id="roi-parking-count" value="45" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">平均每個車位售價 (萬元)</label>
+                                <input type="number" id="roi-parking-price" value="280" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                            </div>
+
+                            <h3 class="font-bold text-sm text-slate-700 border-b border-slate-200 pb-2 pt-2">2. 成本與合建模式設定</h3>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">開發模式</label>
+                                    <select id="roi-dev-mode" onchange="toggleDevMode(); calculateROI();" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white">
+                                        <option value="buy">土地買斷 (全資)</option>
+                                        <option value="joint">合建分回 (自訂地主比例)</option>
+                                    </select>
+                                </div>
+                                <div id="roi-land-cost-container">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">土地取得成本 (萬/坪)</label>
+                                    <input type="number" id="roi-land-cost-ping" value="180" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div id="roi-landlord-ratio-container" class="hidden">
+                                    <label class="block text-xs font-semibold text-amber-700 mb-1">地主分回比例 (%)</label>
+                                    <input type="number" id="roi-landlord-ratio" value="55" min="1" max="99" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-amber-300 bg-amber-50 rounded-lg focus:ring-2 focus:ring-amber-500">
+                                </div>
+                            </div>
+
+                            <!-- Land Fees and Agent (Middleman) Fee Inputs -->
+                            <div class="bg-amber-50/70 p-3 rounded-lg border border-amber-200/80 space-y-2">
+                                <h4 class="font-bold text-xs text-amber-900 flex items-center justify-between">
+                                    <span><i class="fa-solid fa-handshake-angle text-amber-600 mr-1"></i> 土地開發過戶規費與中人費</span>
+                                    <span class="text-[10px] text-amber-700 font-normal">居間仲介與稅費</span>
+                                </h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">中人/居間佣金費率 (%)</label>
+                                        <input type="number" step="0.1" id="roi-middleman-pct" value="2.0" oninput="calculateROI()" class="w-full px-2.5 py-1.5 text-xs border border-amber-300 rounded bg-white focus:ring-2 focus:ring-amber-500">
+                                        <span class="text-[10px] text-slate-400">佔土地價款或協議總額%</span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">土地規費/稅費</label>
+                                        <input type="number" step="0.1" id="roi-land-tax-pct" value="1.5" oninput="calculateROI()" class="w-full px-2.5 py-1.5 text-xs border border-amber-300 rounded bg-white focus:ring-2 focus:ring-amber-500">
+                                        <span class="text-[10px] text-slate-400">印花契稅/地政登記規費%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">營建營造成本 (萬/建坪)</label>
+                                    <input type="number" id="roi-build-cost-ping" value="25" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">容積獎勵/其他規費 (萬元)</label>
+                                    <input type="number" id="roi-other-cost" value="1500" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-200 pt-3 space-y-3">
+                                <h4 class="font-bold text-xs text-slate-700"><i class="fa-solid fa-file-invoice-dollar text-emerald-600 mr-1"></i> 專案專業費用與融資細項設定</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">設計規畫費 (元/建坪)</label>
+                                        <input type="number" id="roi-design-fee-ping" value="2500" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                        <span class="text-[10px] text-slate-400">建築師與結構技師規畫費</span>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">代銷企劃費率 (%)</label>
+                                        <input type="number" step="0.1" id="roi-sales-fee-pct" value="5.0" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                        <span class="text-[10px] text-slate-400">占總銷售金額百分比</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-600 mb-1">管理與行政管銷 (%)</label>
+                                        <input type="number" step="0.1" id="roi-mgmt-fee-pct" value="2.0" oninput="calculateROI()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                                        <span class="text-[10px] text-slate-400">占總銷售金額百分比</span>
+                                    </div>
+                                    <div></div>
+                                </div>
+
+                                <!-- Detailed Land & Construction Loan Settings -->
+                                <div class="bg-slate-100 p-3 rounded-lg border border-slate-200 space-y-2 mt-2">
+                                    <h5 class="font-bold text-xs text-slate-800"><i class="fa-solid fa-building-columns text-emerald-600 mr-1"></i> 土融與建融利息參數</h5>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">土融成數 (%)</label>
+                                            <input type="number" id="roi-land-loan-pct" value="50" oninput="calculateROI()" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">土融年利率 (%)</label>
+                                            <input type="number" step="0.1" id="roi-land-loan-rate" value="3.2" oninput="calculateROI()" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">土融期間(年)</label>
+                                            <input type="number" step="0.5" id="roi-land-loan-years" value="2.5" oninput="calculateROI()" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded bg-white">
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-4 gap-2 pt-1">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">建融成數 (%)</label>
+                                            <input type="number" id="roi-build-loan-pct" value="60" oninput="calculateROI()" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">建融動支率 (%)</label>
+                                            <input type="number" id="roi-build-draw-pct" value="65" oninput="calculateROI()" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">建融年利率 (%)</label>
+                                            <input type="number" step="0.1" id="roi-build-loan-rate" value="2.6" oninput="calculateROI()" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-600 mb-1">建融期間(年)</label>
+                                            <input type="number" step="0.5" id="roi-build-loan-years" value="2.5" oninput="calculateROI()" class="w-full px-2 py-1.5 text-xs border border-slate-300 rounded bg-white">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: ROI Results Output (Revenue Summary & Breakdown) -->
+                        <div class="lg:col-span-7 flex flex-col space-y-3">
+                            <!-- Main Highlight Box -->
+                            <div class="bg-gradient-to-r from-slate-900 to-emerald-950 text-white p-4 rounded-xl shadow-md">
+                                <div class="text-[11px] text-emerald-300 font-medium mb-0.5">預估開發總銷金額 (Revenue)</div>
+                                <div class="text-2xl md:text-3xl font-extrabold text-amber-400 mb-2.5" id="roi-res-total-revenue">72,300 萬元 (7.23 億)</div>
+                                
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 border-t border-slate-800 pt-2.5 text-xs">
+                                    <div>
+                                        <span class="text-slate-400 block text-[10px]">房屋銷售總銷</span>
+                                        <span class="text-sm font-bold text-white" id="roi-res-house-rev">69,700 萬</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block text-[10px]">車位銷售總銷</span>
+                                        <span class="text-sm font-bold text-white" id="roi-res-parking-rev">12,600 萬</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block text-[10px]">開發商可分配售坪</span>
+                                        <span class="text-sm font-bold text-emerald-300" id="roi-res-dev-ping">820 坪</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Financial Breakdown Cards -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                                    <div class="text-[11px] font-semibold text-slate-500 mb-0.5">總開發成本 (Total Cost)</div>
+                                    <div class="text-base font-bold text-slate-800" id="roi-res-total-cost">51,200 萬</div>
+                                    <p class="text-[9px] text-slate-400 mt-0.5">含土地、營建、中人規費與管銷</p>
+                                </div>
+
+                                <div class="p-3 bg-emerald-50/60 rounded-lg border border-emerald-200">
+                                    <div class="text-[11px] font-semibold text-emerald-700 mb-0.5">預估開發淨利 (Net Profit)</div>
+                                    <div class="text-base font-bold text-emerald-600" id="roi-res-net-profit">21,100 萬</div>
+                                    <p class="text-[9px] text-emerald-600/80 mt-0.5">總銷扣除全部成本</p>
+                                </div>
+
+                                <div class="p-3 bg-amber-50/60 rounded-lg border border-amber-200">
+                                    <div class="text-[11px] font-semibold text-amber-700 mb-0.5">投資報酬率 (ROI / 成本毛利)</div>
+                                    <div class="text-base font-bold text-amber-600" id="roi-res-roi-pct">41.2 %</div>
+                                    <p class="text-[9px] text-amber-600/80 mt-0.5">淨利 / 總投入成本</p>
+                                </div>
+                            </div>
+
+                            <!-- Detailed Cost Breakdown Table -->
+                            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1">
+                                <h4 class="font-bold text-slate-700 mb-1.5 border-b border-slate-200 pb-1 flex items-center justify-between">
+                                    <span><i class="fa-solid fa-list-check text-brand-600 mr-1"></i> 財務細項明細估算</span>
+                                    <span class="text-[10px] text-slate-400 font-normal">即時計算更新</span>
+                                </h4>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">土地取得成本：</span>
+                                    <span class="font-bold text-slate-800" id="roi-detail-land-cost">36,000 萬元</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60 bg-amber-50/50 px-1 rounded">
+                                    <span class="text-amber-900 font-medium">中人費 / 居間仲介佣金：</span>
+                                    <span class="font-bold text-amber-800" id="roi-detail-middleman-cost">720 萬元</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60 bg-amber-50/50 px-1 rounded">
+                                    <span class="text-amber-900 font-medium">土地過戶稅費與地政規費：</span>
+                                    <span class="font-bold text-amber-800" id="roi-detail-land-tax-cost">540 萬元</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">營建營造成本 (建坪 × 造價)：</span>
+                                    <span class="font-bold text-slate-800" id="roi-detail-build-cost">20,500 萬元</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">設計規畫費 (建坪 × 單價)：</span>
+                                    <span class="font-bold text-slate-800" id="roi-detail-design-cost">205 萬元</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">代銷企劃費：</span>
+                                    <span class="font-bold text-slate-800" id="roi-detail-sales-cost">3,485 萬元</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">融資利息支出 (土融 + 建融)：</span>
+                                    <span class="font-bold text-slate-800" id="roi-detail-interest-cost">1,450 萬元</span>
+                                </div>
+                                <div class="flex justify-between py-1 border-b border-slate-200/60">
+                                    <span class="text-slate-600">行政管理與獎勵規費：</span>
+                                    <span class="font-bold text-slate-800" id="roi-detail-mgmt-cost">1,394 萬元</span>
+                                </div>
+                                <div class="flex justify-between py-0.5">
+                                    <span class="text-slate-600">預估地主分配比例/價值：</span>
+                                    <span class="font-bold text-amber-700" id="roi-detail-landlord-val">0 萬元 (買斷模式)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: Owner CRM System -->
+            <section id="tab-crm" class="tab-content hidden space-y-6">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-5 border-b border-slate-200 pb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-address-book text-brand-600"></i> 地主與關係人 CRM 歷程
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1">管理關鍵持份地主意願、家族派系、對話紀錄與拜訪排程。</p>
+                        </div>
+                        <button onclick="openModal('addOwnerModal')" class="bg-amber-600 text-white text-xs px-3.5 py-2 rounded-lg font-medium hover:bg-amber-500 transition flex items-center gap-1">
+                            <i class="fa-solid fa-user-plus"></i> 新增地主資料
+                        </button>
+                    </div>
+
+                    <!-- Owners Cards / Table View -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="owners-list-grid">
+                        <!-- Dynamic CRM Cards Rendering -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: Zoning & Regulations Reference -->
+            <section id="tab-regulations" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-book-bookmark text-brand-600"></i> 常見都市計畫使用分區建蔽率/容積率參考表
+                    </h2>
+
+                    <!-- Reference Table -->
+                    <div class="overflow-x-auto mb-6">
+                        <table class="w-full text-left text-xs text-slate-600 border border-slate-200 rounded-lg">
+                            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3">分區類別</th>
+                                    <th class="p-3">法定建蔽率</th>
+                                    <th class="p-3">法定容積率</th>
+                                    <th class="p-3">開發評估要點與特性</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-brand-700">第一種住宅區 (住一)</td>
+                                    <td class="p-3">30% - 40%</td>
+                                    <td class="p-3">60% - 120%</td>
+                                    <td class="p-3">多為低密度高級住宅區、別墅區，容積低但環境品質要求高。</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-brand-700">第二種住宅區 (住二)</td>
+                                    <td class="p-3">50%</td>
+                                    <td class="p-3">120% - 160%</td>
+                                    <td class="p-3">適合中低密度住宅開發。</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 bg-amber-50/40">
+                                    <td class="p-3 font-semibold text-brand-700">第三種住宅區 (住三)</td>
+                                    <td class="p-3">45%</td>
+                                    <td class="p-3">225%</td>
+                                    <td class="p-3 font-medium text-amber-800">主流合建/都更推案主力，建蔽率45%可規劃完整中庭景觀。</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-brand-700">第四種住宅區 (住四)</td>
+                                    <td class="p-3">50%</td>
+                                    <td class="p-3">300%</td>
+                                    <td class="p-3">容積較高，發展潛力大。</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-3 font-semibold text-brand-700">商業區 (商二 / 商三)</td>
+                                    <td class="p-3">65%</td>
+                                    <td class="p-3">560% / 630%</td>
+                                    <td class="p-3">高強度開發，低樓層可做店面商場，高度限制需注意臨路路寬。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Checklist for Land Developers -->
+                    <h3 class="font-bold text-sm text-slate-800 mb-3 border-b border-slate-200 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-emerald-600"></i> 土開業務開發流程與謄本檢核表 (Checklist)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div class="font-bold text-slate-700 mb-2">第一階段：地籍與法規初審</div>
+                            <ul class="space-y-1.5 text-slate-600">
+                                <li><i class="fa-regular fa-square mr-1"></i> 調閱第一類土地與建物謄本</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 確認有無限制登記/他項權利設定</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 套繪地籍圖與都市計畫圖</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 臨路路寬檢討與指定建築線</li>
+                            </ul>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div class="font-bold text-slate-700 mb-2">第二階段：現場勘查與試算</div>
+                            <ul class="space-y-1.5 text-slate-600">
+                                <li><i class="fa-regular fa-square mr-1"></i> 現場實地踏勘 (現況占有、佔用狀況)</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 建築師初步排量體與坪數試算</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 財務試算 (預估推案單價與興建成本)</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 合建分售/分配比例建議書擬定</li>
+                            </ul>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div class="font-bold text-slate-700 mb-2">第三階段：地主談判與簽約</div>
+                            <ul class="space-y-1.5 text-slate-600">
+                                <li><i class="fa-regular fa-square mr-1"></i> 拜訪關鍵持份代表地主</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 開立合作意向書 (LOI) / 合建契約</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 信託與履約保證機制規劃</li>
+                                <li><i class="fa-regular fa-square mr-1"></i> 送件都更/危老/建照審查</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- Modal: Add New Project -->
+    <div id="addProjectModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-5 py-4 bg-brand-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-map-location-dot text-brand-400 mr-2"></i>新增土地開發案場</h3>
+                <button onclick="closeModal('addProjectModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="add-project-form" onsubmit="handleAddProject(event)" class="p-5 space-y-4 overflow-y-auto text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">案場名稱 *</label>
+                    <input type="text" id="new-proj-name" required placeholder="例：板橋府中段危老合建案" class="w-full border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">行政區域 *</label>
+                        <input type="text" id="new-proj-district" required placeholder="例：新北市板橋區" class="w-full border border-slate-300 rounded-lg p-2.5">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">土地使用分區 *</label>
+                        <select id="new-proj-zone" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white">
+                            <option value="住三">住三 (建蔽45%/容積225%)</option>
+                            <option value="住四">住四 (建蔽50%/容積300%)</option>
+                            <option value="商二">商二 (建蔽65%/容積630%)</option>
+                            <option value="商三">商三 (建蔽65%/容積560%)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">總土地面積 (坪) *</label>
+                        <input type="number" id="new-proj-area" required placeholder="180" class="w-full border border-slate-300 rounded-lg p-2.5">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">開發模式 *</label>
+                        <select id="new-proj-mode" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white">
+                            <option value="危老重建">危老重建</option>
+                            <option value="都市更新">都市更新</option>
+                            <option value="合建分售">合建分售</option>
+                            <option value="土地買斷">土地買斷</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">當前開發階段</label>
+                    <select id="new-proj-status" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white">
+                        <option value="評估中">評估中 (初步整合/排量體)</option>
+                        <option value="洽談中">洽談中 (拜訪地主說明)</option>
+                        <option value="簽約中">簽約中 (合建契約擬定)</option>
+                        <option value="已成案">已成案 (已取得建照/送件)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">備註 / 基地特性說明</label>
+                    <textarea id="new-proj-note" rows="3" placeholder="臨路寬度、舊屋現況、地主派系意願摘要..." class="w-full border border-slate-300 rounded-lg p-2.5"></textarea>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('addProjectModal')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100">取消</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-lg font-medium hover:bg-brand-500">儲存案場</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add New Owner CRM -->
+    <div id="addOwnerModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div class="px-5 py-4 bg-amber-700 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-user-plus mr-2"></i>新增地主經營紀錄</h3>
+                <button onclick="closeModal('addOwnerModal')" class="text-amber-200 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="add-owner-form" onsubmit="handleAddOwner(event)" class="p-5 space-y-4 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">地主姓名 *</label>
+                        <input type="text" id="owner-name" required placeholder="陳大明先生" class="w-full border border-slate-300 rounded-lg p-2.5">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">聯絡電話 *</label>
+                        <input type="text" id="owner-phone" required placeholder="0912-345-678" class="w-full border border-slate-300 rounded-lg p-2.5">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">所屬關聯案場</label>
+                        <select id="owner-project-select" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white">
+                            <!-- Dynamic Project List -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">持份面積 (坪)</label>
+                        <input type="number" id="owner-share" placeholder="25.5" class="w-full border border-slate-300 rounded-lg p-2.5">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">開發整合意願強度</label>
+                    <select id="owner-intent" class="w-full border border-slate-300 rounded-lg p-2.5 bg-white">
+                        <option value="高 (高度合建意願)">🔥 高度合建意願</option>
+                        <option value="中 (觀望條件中)">⚡ 中度 (觀望分配條件)</option>
+                        <option value="低 (價格期望極高)">❄️ 低 (持保留態度/開價過高)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">近拜訪紀錄 / 關切重點</label>
+                    <textarea id="owner-notes" rows="3" placeholder="例如：重視選品品質，對樓層分配位置有偏好，有子嗣繼承考量..." class="w-full border border-slate-300 rounded-lg p-2.5"></textarea>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeModal('addOwnerModal')" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-100">取消</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-500">建立紀錄</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Project Detail View -->
+    <div id="projectDetailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-5 py-4 bg-brand-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm" id="detail-title">案場詳細評估資料</h3>
+                <button onclick="closeModal('projectDetailModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-5 text-xs text-slate-700" id="detail-content">
+                <!-- Dynamically populated detail view -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default Mock Data for Land Development System
+        let projects = [
+            {
+                id: 'proj-1',
+                name: '板橋府中段危老合建案',
+                district: '新北市板橋區',
+                zone: '住三',
+                areaPing: 185,
+                mode: '危老重建',
+                status: '洽談中',
+                intentScore: 85,
+                note: '臨12米計畫道路，地主共8戶，核心地主3戶已簽合作意向書。',
+                ownersCount: 8,
+                updatedAt: '2026-10-10'
+            },
+            {
+                id: 'proj-2',
+                name: '三重菜寮捷運周邊都更案',
+                district: '新北市三重區',
+                zone: '商二',
+                areaPing: 420,
+                mode: '都市更新',
+                status: '評估中',
+                intentScore: 60,
+                note: '容積率高(630%)，目前建築師評估排量體中，舊公寓約22戶。',
+                ownersCount: 22,
+                updatedAt: '2026-10-12'
+            },
+            {
+                id: 'proj-3',
+                name: '中山區長安東路買斷案',
+                district: '臺北市中山區',
+                zone: '商三',
+                areaPing: 95,
+                mode: '土地買斷',
+                status: '簽約中',
+                intentScore: 95,
+                note: '單一地主產權單純，議價階段，預計本季完成土地買賣簽約。',
+                ownersCount: 1,
+                updatedAt: '2026-10-14'
+            },
+            {
+                id: 'proj-4',
+                name: '新莊副都心段合建基地',
+                district: '新北市新莊區',
+                zone: '住四',
+                areaPing: 310,
+                mode: '合建分售',
+                status: '評估中',
+                intentScore: 50,
+                note: '鄰接角地，正評估鄰地併案可能性。',
+                ownersCount: 5,
+                updatedAt: '2026-10-08'
+            }
+        ];
+
+        let owners = [
+            {
+                id: 'owner-1',
+                projectId: 'proj-1',
+                name: '張董事長 (地主代表)',
+                phone: '0932-111-222',
+                sharePing: 45.2,
+                intent: '高 (高度合建意願)',
+                notes: '家族持有最大持份，偏好分回中高樓層3房產品。',
+                lastContact: '2026-10-12'
+            },
+            {
+                id: 'owner-2',
+                projectId: 'proj-1',
+                name: '李老太太',
+                phone: '02-2960-3456',
+                sharePing: 18.0,
+                intent: '中 (觀望條件中)',
+                notes: '由長男負責接洽，關心都更重建期間租金補貼與搬遷津貼。',
+                lastContact: '2026-10-05'
+            },
+            {
+                id: 'owner-3',
+                projectId: 'proj-3',
+                name: '林先生',
+                phone: '0910-888-999',
+                sharePing: 95.0,
+                intent: '高 (高度合建意願)',
+                notes: '價格合理即願意出售，希望11月底前完成產權移轉。',
+                lastContact: '2026-10-13'
+            }
+        ];
+
+        let pipelineChartInstance = null;
+
+        // On Page Load Initialize
+        window.onload = function() {
+            renderDashboard();
+            renderProjects();
+            renderOwners();
+            calculateLandCapacity();
+            calculateROI();
+            populateProjectSelectOptions();
+        };
+
+        // Navigation Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-50', 'text-brand-600');
+                btn.classList.add('text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-brand-50', 'text-brand-600');
+                activeBtn.classList.remove('text-slate-600');
+            }
+
+            if(tabId === 'dashboard') {
+                renderDashboard();
+            }
+        }
+
+        // Render Dashboard Stats & Pipeline Chart
+        function renderDashboard() {
+            const totalProjects = projects.length;
+            const totalLandArea = projects.reduce((sum, p) => sum + p.areaPing, 0);
+            const hotProjects = projects.filter(p => p.status === '洽談中' || p.status === '簽約中').length;
+
+            document.getElementById('total-projects-count').innerText = `${totalProjects} 件`;
+            document.getElementById('total-land-area').innerText = `${totalLandArea.toLocaleString()} 坪`;
+            document.getElementById('hot-projects-count').innerText = `${hotProjects} 件`;
+
+            // Render Recent Projects Table
+            const recentContainer = document.getElementById('dashboard-recent-projects');
+            recentContainer.innerHTML = projects.map(p => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-3">
+                        <div class="font-bold text-slate-800">${p.name}</div>
+                        <div class="text-[10px] text-slate-400">${p.district}</div>
+                    </td>
+                    <td class="p-3"><span class="px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-600 font-medium">${p.zone}</span></td>
+                    <td class="p-3 font-semibold text-slate-700">${p.areaPing} 坪</td>
+                    <td class="p-3"><span class="text-brand-700 font-medium">${p.mode}</span></td>
+                    <td class="p-3">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-12 bg-slate-200 h-2 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-full" style="width: ${p.intentScore}%"></div>
+                            </div>
+                            <span class="text-[11px] font-bold text-slate-700">${p.intentScore}%</span>
+                        </div>
+                    </td>
+                    <td class="p-3">
+                        <button onclick="viewProjectDetail('${p.id}')" class="text-brand-600 hover:text-brand-800 font-medium text-xs">詳情</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Render Pipeline Chart
+            const ctx = document.getElementById('pipelineChart').getContext('2d');
+            const statusCounts = {
+                '評估中': projects.filter(p => p.status === '評估中').length,
+                '洽談中': projects.filter(p => p.status === '洽談中').length,
+                '簽約中': projects.filter(p => p.status === '簽約中').length,
+                '已成案': projects.filter(p => p.status === '已成案').length,
+            };
+
+            if (pipelineChartInstance) {
+                pipelineChartInstance.destroy();
+            }
+
+            pipelineChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['評估中', '洽談中', '簽約中', '已成案'],
+                    datasets: [{
+                        data: [statusCounts['評估中'], statusCounts['洽談中'], statusCounts['簽約中'], statusCounts['已成案']],
+                        backgroundColor: ['#94a3b8', '#f59e0b', '#0284c7', '#10b981'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { size: 11, family: 'Noto Sans TC' } }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // Render Projects Cards
+        function renderProjects() {
+            const search = document.getElementById('project-search').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const zoneFilter = document.getElementById('filter-zone').value;
+
+            const grid = document.getElementById('projects-grid');
+            const filtered = projects.filter(p => {
+                const matchSearch = p.name.toLowerCase().includes(search) || p.district.toLowerCase().includes(search);
+                const matchStatus = statusFilter === 'ALL' || p.status === statusFilter;
+                const matchZone = zoneFilter === 'ALL' || p.zone === zoneFilter;
+                return matchSearch && matchStatus && matchZone;
+            });
+
+            grid.innerHTML = filtered.map(p => {
+                let badgeColor = 'bg-slate-100 text-slate-600';
+                if(p.status === '洽談中') badgeColor = 'bg-amber-100 text-amber-800 border-amber-200';
+                if(p.status === '簽約中') badgeColor = 'bg-sky-100 text-sky-800 border-sky-200';
+                if(p.status === '已成案') badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+
+                return `
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2.5 py-1 text-[11px] rounded-full font-bold border ${badgeColor}">${p.status}</span>
+                                <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${p.updatedAt}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-800 text-base mb-1">${p.name}</h3>
+                            <p class="text-xs text-slate-500 mb-3"><i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>${p.district}</p>
+                            
+                            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs mb-3">
+                                <div><span class="text-slate-400">分區:</span> <span class="font-semibold text-slate-700">${p.zone}</span></div>
+                                <div><span class="text-slate-400">基地坪數:</span> <span class="font-semibold text-slate-700">${p.areaPing} 坪</span></div>
+                                <div><span class="text-slate-400">模式:</span> <span class="font-semibold text-slate-700">${p.mode}</span></div>
+                                <div><span class="text-slate-400">關聯地主:</span> <span class="font-semibold text-slate-700">${p.ownersCount} 戶</span></div>
+                            </div>
+
+                            <p class="text-xs text-slate-600 line-clamp-2 bg-slate-50/50 p-2 rounded text-[11px] italic">"${p.note}"</p>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <button onclick="viewProjectDetail('${p.id}')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-2 rounded-lg font-medium transition flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-file-lines"></i> 檢視開發評估與細節
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render Owner CRM
+        function renderOwners() {
+            const container = document.getElementById('owners-list-grid');
+            container.innerHTML = owners.map(o => {
+                const proj = projects.find(p => p.id === o.projectId);
+                const projName = proj ? proj.name : '未關聯案場';
+
+                return `
+                    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-sm text-slate-800">${o.name}</h4>
+                                <p class="text-xs text-brand-600 font-medium"><i class="fa-solid fa-phone text-xs mr-1"></i>${o.phone}</p>
+                            </div>
+                            <span class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] px-2 py-0.5 rounded font-bold">${o.intent}</span>
+                        </div>
+
+                        <div class="text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-100 space-y-1">
+                            <div><span class="text-slate-400">關聯案場：</span><span class="font-semibold text-slate-700">${projName}</span></div>
+                            <div><span class="text-slate-400">估算持份：</span><span class="font-semibold text-slate-700">${o.sharePing} 坪</span></div>
+                            <div><span class="text-slate-400">最後聯繫：</span><span class="text-slate-500">${o.lastContact}</span></div>
+                        </div>
+
+                        <div class="text-xs text-slate-600 italic bg-amber-50/30 p-2 rounded border border-amber-100">
+                            "${o.notes}"
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Land Capacity Calculation Engine
+        function calculateLandCapacity() {
+            const areaPing = parseFloat(document.getElementById('calc-area-ping').value) || 0;
+            const covRate = (parseFloat(document.getElementById('calc-cov-rate').value) || 0) / 100;
+            const volRate = (parseFloat(document.getElementById('calc-vol-rate').value) || 0) / 100;
+            const bonusRate = (parseFloat(document.getElementById('calc-bonus-rate').value) || 0) / 100;
+            const transferRate = (parseFloat(document.getElementById('calc-transfer-rate').value) || 0) / 100;
+            const exemptRatio = parseFloat(document.getElementById('calc-exempt-ratio').value) || 1.15;
+            const publicRatio = (parseFloat(document.getElementById('calc-public-ratio').value) || 0) / 100;
+
+            // Calculations
+            const baseVolPing = areaPing * volRate;
+            const totalVolRateMultiplier = volRate * (1 + bonusRate + transferRate);
+            const totalVolPing = areaPing * totalVolRateMultiplier;
+            
+            // Total Gross Floor Area (Include exempt area like stairs, balcony)
+            const grossFloorPing = totalVolPing * exemptRatio;
+            
+            // Estimated Total Saleable Area
+            const totalBuildPing = grossFloorPing; 
+            const footprintPing = areaPing * covRate;
+            const multiplier = areaPing > 0 ? (totalBuildPing / areaPing).toFixed(2) : 0;
+
+            // Render Output
+            document.getElementById('res-total-build-ping').innerText = `${totalBuildPing.toFixed(2)} 坪`;
+            document.getElementById('res-base-vol-ping').innerText = `${baseVolPing.toFixed(2)} 坪`;
+            document.getElementById('res-total-vol-ping').innerText = `${totalVolPing.toFixed(2)} 坪`;
+            document.getElementById('res-gross-floor-ping').innerText = `${grossFloorPing.toFixed(2)} 坪`;
+            document.getElementById('res-building-footprint').innerText = `${footprintPing.toFixed(2)} 坪`;
+            document.getElementById('res-multiplier').innerText = `1 : ${multiplier} 坪`;
+        }
+
+        function transferToROI() {
+            const areaPing = document.getElementById('calc-area-ping').value;
+            const totalBuildPingText = document.getElementById('res-total-build-ping').innerText;
+            const totalBuildPing = parseFloat(totalBuildPingText) || 0;
+
+            // Assign to ROI inputs
+            document.getElementById('roi-area-ping').value = areaPing;
+            document.getElementById('roi-total-sale-ping').value = Math.round(totalBuildPing);
+
+            // Switch tab to ROI
+            switchTab('roi');
+
+            // Trigger ROI calculation with updated values
+            calculateROI();
+        }
+
+        // Financial & ROI Calculation Engine
+        function calculateROI() {
+            const areaPing = parseFloat(document.getElementById('roi-area-ping').value) || 0;
+            const totalSalePing = parseFloat(document.getElementById('roi-total-sale-ping').value) || 0;
+            const salePrice = parseFloat(document.getElementById('roi-sale-price').value) || 0; // 萬/坪
+            const parkingCount = parseFloat(document.getElementById('roi-parking-count').value) || 0;
+            const parkingPrice = parseFloat(document.getElementById('roi-parking-price').value) || 0; // 萬元
+            const devMode = document.getElementById('roi-dev-mode').value;
+            const landCostPing = parseFloat(document.getElementById('roi-land-cost-ping').value) || 0; // 萬/地坪
+            const buildCostPing = parseFloat(document.getElementById('roi-build-cost-ping').value) || 0; // 萬/建坪
+            const otherCost = parseFloat(document.getElementById('roi-other-cost').value) || 0; // 萬元
+
+            // Middleman & Land Tax Parameters (NEW)
+            const middlemanPct = (parseFloat(document.getElementById('roi-middleman-pct').value) || 0) / 100;
+            const landTaxPct = (parseFloat(document.getElementById('roi-land-tax-pct').value) || 0) / 100;
+
+            // Additional Detailed Rates & Unit Prices
+            const designFeePing = parseFloat(document.getElementById('roi-design-fee-ping').value) || 0; // 元/建坪
+            const salesFeePct = (parseFloat(document.getElementById('roi-sales-fee-pct').value) || 0) / 100;
+            const mgmtFeePct = (parseFloat(document.getElementById('roi-mgmt-fee-pct').value) || 0) / 100;
+
+            // Loan Parameters
+            const landLoanPct = (parseFloat(document.getElementById('roi-land-loan-pct').value) || 0) / 100;
+            const landLoanRate = (parseFloat(document.getElementById('roi-land-loan-rate').value) || 0) / 100;
+            const landLoanYears = parseFloat(document.getElementById('roi-land-loan-years').value) || 0;
+
+            const buildLoanPct = (parseFloat(document.getElementById('roi-build-loan-pct').value) || 0) / 100;
+            const buildDrawPct = (parseFloat(document.getElementById('roi-build-draw-pct').value) || 0) / 100;
+            const buildLoanRate = (parseFloat(document.getElementById('roi-build-loan-rate').value) || 0) / 100;
+            const buildLoanYears = parseFloat(document.getElementById('roi-build-loan-years').value) || 0;
+
+            // 1. Gross Revenue
+            const houseRevenue = totalSalePing * salePrice; // 萬元
+            const parkingRevenue = parkingCount * parkingPrice; // 萬元
+            let totalGrossRevenue = houseRevenue + parkingRevenue; // 萬元
+
+            // 2. Land Cost
+            let landCost = areaPing * landCostPing; // 萬元
+
+            // 3. Build Cost
+            let buildCost = totalSalePing * buildCostPing; // 萬元
+
+            // 4. Developer share adjustment if joint venture with custom ratio
+            let devSalePing = totalSalePing;
+            let landlordValue = 0;
+            if(devMode === 'joint') {
+                const landlordRatio = (parseFloat(document.getElementById('roi-landlord-ratio').value) || 55) / 100;
+                const devRatio = 1 - landlordRatio;
+                devSalePing = totalSalePing * devRatio;
+                landlordValue = houseRevenue * landlordRatio;
+                totalGrossRevenue = (devSalePing * salePrice) + parkingRevenue; 
+                landCost = 0; // 合建模式不買斷土地
+            }
+
+            // 5. Middleman Fee & Land Tax Cost Calculation
+            // 在買斷模式下依據總土地價款計算；在合建模式下若有協議，可依土地價值基數或補償試算
+            const landBaseForFee = devMode === 'buy' ? landCost : landlordValue;
+            const middlemanCost = landBaseForFee * middlemanPct; // 萬元
+            const landTaxCost = landBaseForFee * landTaxPct; // 萬元
+
+            // 6. Detailed Professional & Operating Costs
+            const designCost = (totalSalePing * designFeePing) / 10000; // 設計費 = 總建坪 × 每坪單價 (元轉萬元)
+            const salesCost = totalGrossRevenue * salesFeePct; // 代銷費依總銷計
+            const mgmtCost = totalGrossRevenue * mgmtFeePct; // 管理費依總銷計
+
+            // 7. Detailed Interest Cost Calculation (Land Loan + Building Loan)
+            const landLoanInterest = landCost * landLoanPct * landLoanRate * landLoanYears;
+            const buildLoanInterest = buildCost * buildLoanPct * buildDrawPct * buildLoanRate * buildLoanYears;
+            const interestCost = landLoanInterest + buildLoanInterest;
+
+            const totalCost = landCost + middlemanCost + landTaxCost + buildCost + otherCost + designCost + salesCost + mgmtCost + interestCost;
+            const netProfit = totalGrossRevenue - totalCost;
+            const roiPct = totalCost > 0 ? ((netProfit / totalCost) * 100).toFixed(1) : 0;
+
+            // Render Output
+            document.getElementById('roi-res-total-revenue').innerText = `${Math.round(totalGrossRevenue).toLocaleString()} 萬元 (${(totalGrossRevenue/10000).toFixed(2)} 億)`;
+            document.getElementById('roi-res-house-rev').innerText = `${Math.round(devSalePing * salePrice).toLocaleString()} 萬`;
+            document.getElementById('roi-res-parking-rev').innerText = `${Math.round(parkingRevenue).toLocaleString()} 萬`;
+            document.getElementById('roi-res-dev-ping').innerText = `${Math.round(devSalePing)} 坪`;
+
+            document.getElementById('roi-res-total-cost').innerText = `${Math.round(totalCost).toLocaleString()} 萬`;
+            document.getElementById('roi-res-net-profit').innerText = `${Math.round(netProfit).toLocaleString()} 萬`;
+            document.getElementById('roi-res-roi-pct').innerText = `${roiPct} %`;
+
+            document.getElementById('roi-detail-land-cost').innerText = `${Math.round(landCost).toLocaleString()} 萬元`;
+            document.getElementById('roi-detail-middleman-cost').innerText = `${Math.round(middlemanCost).toLocaleString()} 萬元 (${(middlemanPct*100).toFixed(1)}%)`;
+            document.getElementById('roi-detail-land-tax-cost').innerText = `${Math.round(landTaxCost).toLocaleString()} 萬元 (${(landTaxPct*100).toFixed(1)}%)`;
+            document.getElementById('roi-detail-build-cost').innerText = `${Math.round(buildCost).toLocaleString()} 萬元`;
+            document.getElementById('roi-detail-design-cost').innerText = `${Math.round(designCost).toLocaleString()} 萬元`;
+            document.getElementById('roi-detail-sales-cost').innerText = `${Math.round(salesCost).toLocaleString()} 萬元`;
+            document.getElementById('roi-detail-interest-cost').innerText = `${Math.round(interestCost).toLocaleString()} 萬元 (土融: ${Math.round(landLoanInterest)}萬 + 建融: ${Math.round(buildLoanInterest)}萬)`;
+            document.getElementById('roi-detail-mgmt-cost').innerText = `${Math.round(mgmtCost).toLocaleString()} 萬元`;
+            document.getElementById('roi-detail-landlord-val').innerText = devMode === 'buy' ? '0 萬元 (全資買斷)' : `${Math.round(landlordValue).toLocaleString()} 萬元 (地主分回價值)`;
+        }
+
+        function toggleDevMode() {
+            const devMode = document.getElementById('roi-dev-mode').value;
+            const landCostContainer = document.getElementById('roi-land-cost-container');
+            const landlordRatioContainer = document.getElementById('roi-landlord-ratio-container');
+
+            if(devMode === 'joint') {
+                landCostContainer.classList.add('hidden');
+                landlordRatioContainer.classList.remove('hidden');
+            } else {
+                landCostContainer.classList.remove('hidden');
+                landlordRatioContainer.classList.add('hidden');
+            }
+        }
+
+        function syncAreaInputs(type) {
+            if(type === 'ping') {
+                const ping = parseFloat(document.getElementById('calc-area-ping').value) || 0;
+                document.getElementById('calc-area-m2').value = (ping * 3.30578).toFixed(2);
+            } else {
+                const m2 = parseFloat(document.getElementById('calc-area-m2').value) || 0;
+                document.getElementById('calc-area-ping').value = (m2 / 3.30578).toFixed(2);
+            }
+            calculateLandCapacity();
+        }
+
+        // Add Project Form Handler
+        function handleAddProject(e) {
+            e.preventDefault();
+            const newProj = {
+                id: `proj-${Date.now()}`,
+                name: document.getElementById('new-proj-name').value,
+                district: document.getElementById('new-proj-district').value,
+                zone: document.getElementById('new-proj-zone').value,
+                areaPing: parseFloat(document.getElementById('new-proj-area').value) || 0,
+                mode: document.getElementById('new-proj-mode').value,
+                status: document.getElementById('new-proj-status').value,
+                intentScore: 70,
+                note: document.getElementById('new-proj-note').value || '暫無紀錄',
+                ownersCount: 1,
+                updatedAt: new Date().toISOString().split('T')[0]
+            };
+
+            projects.unshift(newProj);
+            renderDashboard();
+            renderProjects();
+            populateProjectSelectOptions();
+            closeModal('addProjectModal');
+            document.getElementById('add-project-form').reset();
+        }
+
+        // Add Owner CRM Handler
+        function handleAddOwner(e) {
+            e.preventDefault();
+            const newOwner = {
+                id: `owner-${Date.now()}`,
+                projectId: document.getElementById('owner-project-select').value,
+                name: document.getElementById('owner-name').value,
+                phone: document.getElementById('owner-phone').value,
+                sharePing: parseFloat(document.getElementById('owner-share').value) || 0,
+                intent: document.getElementById('owner-intent').value,
+                notes: document.getElementById('owner-notes').value || '尚無紀錄',
+                lastContact: new Date().toISOString().split('T')[0]
+            };
+
+            owners.unshift(newOwner);
+            renderOwners();
+            closeModal('addOwnerModal');
+            document.getElementById('add-owner-form').reset();
+        }
+
+        function populateProjectSelectOptions() {
+            const select = document.getElementById('owner-project-select');
+            select.innerHTML = projects.map(p => `<option value="${p.id}">${p.name} (${p.district})</option>`).join('');
+        }
+
+        // View Project Detailed Modal
+        function viewProjectDetail(projId) {
+            const proj = projects.find(p => p.id === projId);
+            if(!proj) return;
+
+            document.getElementById('detail-title').innerText = `案場評估簡報：${proj.name}`;
+            
+            // Calculate quick estimates
+            const volMap = { '住三': 225, '住四': 300, '商二': 630, '商三': 560 };
+            const volRate = volMap[proj.zone] || 225;
+            const baseVolPing = (proj.areaPing * (volRate / 100)).toFixed(1);
+            const estBuildPing = (baseVolPing * 1.2 * 1.15).toFixed(1); // Rough estimate with 20% bonus
+
+            const relatedOwners = owners.filter(o => o.projectId === proj.id);
+
+            document.getElementById('detail-content').innerHTML = `
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-2 gap-4">
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">坐落區域</span>
+                        <span class="font-bold text-slate-800 text-sm">${proj.district}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">都市分區</span>
+                        <span class="font-bold text-slate-800 text-sm">${proj.zone} (法定容積 ${volRate}%)</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">基地總面積</span>
+                        <span class="font-bold text-brand-700 text-sm">${proj.areaPing} 坪</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">開發模式</span>
+                        <span class="font-bold text-slate-800 text-sm">${proj.mode}</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-3">
+                    <h4 class="font-bold text-slate-800 mb-2">試算估算指標</h4>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 bg-brand-50 rounded-lg border border-brand-100">
+                            <div class="text-slate-500">預估基本容積坪</div>
+                            <div class="text-base font-bold text-brand-800">${baseVolPing} 坪</div>
+                        </div>
+                        <div class="p-3 bg-amber-50 rounded-lg border border-amber-100">
+                            <div class="text-amber-700">預估總銷售坪 (含危老獎勵)</div>
+                            <div class="text-base font-bold text-amber-800">${estBuildPing} 坪</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-200 pt-3">
+                    <h4 class="font-bold text-slate-800 mb-2">現場現況與開發備註</h4>
+                    <p class="text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200">${proj.note}</p>
+                </div>
+
+                <div class="border-t border-slate-200 pt-3">
+                    <h4 class="font-bold text-slate-800 mb-2 flex items-center justify-between">
+                        <span>已登記持份地主 (${relatedOwners.length} 人)</span>
+                        <button onclick="closeModal('projectDetailModal'); openModal('addOwnerModal')" class="text-xs text-brand-600 hover:underline font-normal">+ 新增此案地主</button>
+                    </h4>
+                    ${relatedOwners.length > 0 ? `
+                        <div class="space-y-2">
+                            ${relatedOwners.map(o => `
+                                <div class="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center text-xs">
+                                    <div>
+                                        <span class="font-bold text-slate-800">${o.name}</span>
+                                        <span class="text-slate-400 ml-2">(${o.sharePing}坪)</span>
+                                    </div>
+                                    <span class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-[10px] font-medium border border-amber-200">${o.intent}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p class="text-slate-400 italic text-xs">尚未建立此案場地主細部資料。</p>'}
+                </div>
+            `;
+
+            openModal('projectDetailModal');
+        }
+
+        // Modal Helpers
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
